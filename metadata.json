@@ -1,0 +1,5 @@
+{
+  "name": "Onda Sonora",
+  "description": "A cyber-noir conversational voice app with real-time audio, AI chatbot, TTS, and transcription.",
+  "requestFramePermissions": ["microphone"]
+}
