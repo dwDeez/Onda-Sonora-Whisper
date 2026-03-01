@@ -184,12 +184,14 @@ export default function Airlock() {
                       onChange={(e) => setContext(e.target.value)}
                     >
                       <option className="bg-surface" value="BUSINESS">BUSINESS MEETING</option>
-                      <option className="bg-surface" value="CASUAL">CASUAL CONVERSATION</option>
+                      <option className="bg-surface" value="ACADEMIC">UNIVERSITY SEMINAR</option>
                       <option className="bg-surface" value="TECHNICAL">TECHNICAL INTERVIEW</option>
+                      <option className="bg-surface" value="SHOPPING">RETAIL SHOPPING</option>
                       <option className="bg-surface" value="TRAVEL">AIRPORT / TRAVEL</option>
                       <option className="bg-surface" value="INTERVIEW">JOB INTERVIEW</option>
                       <option className="bg-surface" value="MEDICAL">MEDICAL CHECKUP</option>
-                    </select>
+                      <option className="bg-surface" value="SOCIAL">SOCIAL EVENT</option>
+                      <option className="bg-surface" value="CASUAL">CASUAL CONVERSATION</option>                    </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
                       <span className="material-symbols-outlined text-[18px]">expand_more</span>
                     </div>

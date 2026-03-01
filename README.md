@@ -55,7 +55,7 @@ Lo que hace único a Onda Sonora es su arquitectura **Local-First AI**:
     *   Guarda palabras automáticamente desde tus sesiones.
     *   **Modo Interlineal**: Traducciones dinámica EN/ES mientras repasas.
     *   **Pronunciación**: Integración de síntesis de voz (TTS) para cada palabra.
-*   **Context-Aware Learning**: Practica en 10 escenarios reales (Negocios, Viajes, Médico, etc.).
+*   **Context-Aware Learning**: Practica en 9 escenarios reales (Negocios, Viajes, Médico, etc.).
 *   **Gestión de Vocabulario**: Banco de palabras con sugerencias impulsadas por IA.
 *   **Interfaz Premium**: Diseño visualmente impactante con glassmorfismo y animaciones fluidas.
 
