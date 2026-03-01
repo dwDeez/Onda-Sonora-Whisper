@@ -63,13 +63,13 @@ Lo que hace único a Onda Sonora es su arquitectura **Local-First AI**:
 
 <div align="center">
 
+### 🏠 Inicio
+*Pantalla de inicio de la aplicación.*  
+![Inicio](docs/images/inicio.png)
+
 ### 🏠 Dashboard Principal
 *Muestra de la vista general del usuario, metas y progreso.*  
 ![Dashboard Principal](docs/images/dashboard.png)
-
-### 🎨 Studio & Traductor
-*Herramienta de traducción profesional con soporte de IA.*  
-![Studio & Traductor](docs/images/studio.png)
 
 ### 🎙️ Void Mode
 *Interfaz de práctica oral en tiempo real.*  
@@ -79,6 +79,15 @@ Lo que hace único a Onda Sonora es su arquitectura **Local-First AI**:
 *Repaso espaciado y gestión de vocabulario.*  
 ![Flashcards & Archive](docs/images/archive.png)
 ![Flashcards Detail](docs/images/flashcards.png)
+
+### The Terminal
+*Interfaz de terminal practica escritura chateando con la IA en tiempo real.*  
+![The Terminal](docs/images/terminal.png)
+
+### 🎨 Studio & Traductor
+*Herramienta de traducción profesional con soporte de IA.*  
+![Studio & Traductor](docs/images/studio.png)
+
 
 </div>
 
