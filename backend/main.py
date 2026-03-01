@@ -213,6 +213,7 @@ def create_session(session: SessionCreate):
         "date": current_date,
         "score": session.score,
         "practice_type": session.practice_type,
+        "duration": session.duration,
         "issues": issues_response
     }
 

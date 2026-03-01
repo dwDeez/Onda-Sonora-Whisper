@@ -1,7 +1,8 @@
 import { ollama } from './ollamaApi';
 import { promptService } from './promptService';
 
-const WHISPER_URL = 'http://127.0.0.1:8080/inference';
+const WHISPER_URL = import.meta.env.VITE_WHISPER_URL || 'http://127.0.0.1:8080/inference';
+console.log('[WhisperSession] Using WHISPER_URL:', WHISPER_URL);
 const MAX_AUDIO_MS = 10000;    // Absolute max per turn
 const SILENCE_LIMIT_MS = 1500; // Stop recording if quiet for 1.5s
 const RMS_VAD_THRESHOLD = 0.02; // Threshold for presence of speech

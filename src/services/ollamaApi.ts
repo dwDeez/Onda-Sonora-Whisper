@@ -12,9 +12,10 @@ export class OllamaService {
     private baseUrl: string;
     private model: string;
 
-    constructor(baseUrl: string = 'http://localhost:11434', model: string = 'llama3') {
+    constructor(baseUrl: string = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434', model: string = 'llama3') {
         this.baseUrl = baseUrl;
         this.model = model;
+        console.log('[OllamaService] Using baseUrl:', this.baseUrl);
     }
 
     setModel(model: string) {
