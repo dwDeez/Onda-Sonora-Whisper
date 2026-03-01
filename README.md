@@ -80,7 +80,7 @@ Lo que hace único a Onda Sonora es su arquitectura **Local-First AI**:
 ![Flashcards & Archive](docs/images/archive.png)
 ![Flashcards Detail](docs/images/flashcards.png)
 
-### The Terminal
+### 💻 The Terminal
 *Interfaz de terminal practica escritura chateando con la IA en tiempo real.*  
 ![The Terminal](docs/images/terminal.png)
 
