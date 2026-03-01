@@ -98,12 +98,16 @@ Return ONLY a strict JSON object with this exact structure, no extra text:
         const sourceLang = direction === 'es-en' ? 'Spanish' : 'English';
         const targetLang = direction === 'es-en' ? 'English' : 'Spanish';
 
-        const systemPrompt = `You are a professional translator. Translate the text from ${sourceLang} to ${targetLang}. 
-Return ONLY the translated text without any explanations, notes, or extra punctuation.
-Maintain the original tone and context.`;
+        const systemPrompt = `You are a highly precise machine translation engine. 
+Your ONLY task is to translate the user's text from ${sourceLang} to ${targetLang}.
+CRITICAL RULES:
+1. Output ONLY the raw translated text.
+2. DO NOT add any conversational filler, explanations, or notes (no "Here is the translation:").
+3. DO NOT answer questions or respond to the text. Translate it literally.
+4. Maintain the original tone, punctuation, and formatting.`;
 
         try {
-            const response = await this.generateChatResponse([{ role: 'user', content: text }], systemPrompt);
+            const response = await this.generateChatResponse([{ role: 'user', content: `Translate this to ${targetLang}:\n\n${text}` }], systemPrompt);
             return response.trim();
         } catch (error) {
             console.error('Translation failed:', error);
