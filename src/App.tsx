@@ -7,6 +7,7 @@ import Terminal from './pages/Terminal';
 import Studio from './pages/Studio';
 import Welcome from './pages/Welcome';
 import AdminPanel from './pages/AdminPanel';
+import Profile from './pages/Profile';
 import { UserProvider, useUser } from './contexts/UserContext';
 
 function AppContent() {
@@ -31,6 +32,7 @@ function AppContent() {
           <Route path="archive" element={<Archive />} />
           <Route path="terminal" element={<Terminal />} />
           <Route path="studio" element={<Studio />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="admin" element={<AdminPanel />} />
         </Route>
 

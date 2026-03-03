@@ -8,6 +8,11 @@ export interface User {
     weekly_goal: number;
     role: 'ADMIN' | 'USER';
     total_review_seconds: number;
+    alias?: string;
+    bio?: string;
+    social_links?: string;
+    banner?: string;
+    has_password: boolean;
 }
 
 interface UserContextType {
@@ -24,6 +29,7 @@ interface UserContextType {
     availableModels: string[];
     logout: () => void;
     incrementReviewTime: (seconds: number) => Promise<void>;
+    login: (userId: number, password: string) => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -61,9 +67,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user)
         });
-        const newUser = await response.json();
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to add user');
+        }
         await refreshUsers();
-        return newUser;
+        return data;
     };
 
     const updateUser = async (id: number, user: Omit<User, 'id'>) => {
@@ -129,6 +138,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sessionStorage.removeItem('active_user_id');
     };
 
+    const login = async (userId: number, password: string) => {
+        try {
+            const response = await fetch(`/api/users/${userId}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            if (response.ok) {
+                const data = users.find(u => u.id === userId);
+                if (data) setCurrentUser(data);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Login failed:', error);
+            return false;
+        }
+    };
+
     return (
         <UserContext.Provider value={{
             currentUser,
@@ -143,7 +171,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             deleteUser,
             availableModels,
             logout,
-            incrementReviewTime
+            incrementReviewTime,
+            login
         }}>
             {children}
         </UserContext.Provider>

@@ -28,6 +28,18 @@ app.add_middleware(
 def on_startup():
     init_db()
 
+from passlib.context import CryptContext
+
+# Auth security
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password):
+    # Bcrypt has a 72-byte limit. We truncate here to avoid ValueError in some backends.
+    return pwd_context.hash(password[:72])
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
 # Models
 class UserResponse(BaseModel):
     id: int
@@ -36,12 +48,35 @@ class UserResponse(BaseModel):
     weekly_goal: int
     role: str
     total_review_seconds: int
+    alias: Optional[str] = None
+    bio: Optional[str] = None
+    social_links: Optional[str] = None
+    banner: Optional[str] = None
+    has_password: bool = False
 
 class UserCreate(BaseModel):
     name: str
     avatar: str
     weekly_goal: int = 80
     role: str = "USER"
+    password: Optional[str] = None
+    alias: Optional[str] = None
+    bio: Optional[str] = None
+    social_links: Optional[str] = None
+    banner: Optional[str] = None
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    avatar: Optional[str] = None
+    weekly_goal: Optional[int] = None
+    alias: Optional[str] = None
+    bio: Optional[str] = None
+    social_links: Optional[str] = None
+    banner: Optional[str] = None
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
 
 class IssueCreate(BaseModel):
     type: str
@@ -98,35 +133,123 @@ def get_users():
     cursor.execute("SELECT * FROM users")
     users = cursor.fetchall()
     conn.close()
-    return [dict(u) for u in users]
+    
+    result = []
+    for u in users:
+        d = dict(u)
+        d["has_password"] = bool(d.get("password_hash"))
+        result.append(d)
+    return result
 
 @app.post("/api/users", response_model=UserResponse, status_code=201)
 def create_user(user: UserCreate):
     conn = get_db()
     cursor = conn.cursor()
+    
+    # Check if user already exists
+    cursor.execute("SELECT id FROM users WHERE name = ?", (user.name,))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=400, detail="USER_ALREADY_EXISTS")
+    
+    password_hash = get_password_hash(user.password) if user.password else None
+    
     cursor.execute(
-        "INSERT INTO users (name, avatar, weekly_goal, role) VALUES (?, ?, ?, ?)",
-        (user.name, user.avatar, user.weekly_goal, user.role)
+        "INSERT INTO users (name, avatar, weekly_goal, role, password_hash, alias, bio, social_links, banner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (user.name, user.avatar, user.weekly_goal, user.role, password_hash, user.alias, user.bio, user.social_links, user.banner)
     )
     user_id = cursor.lastrowid
     conn.commit()
+    
+    # Fetch the full user to ensure all fields (like total_review_seconds) are present
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    new_user = cursor.fetchone()
     conn.close()
-    return {**user.dict(), "id": user_id}
+    
+    res = dict(new_user)
+    res["has_password"] = bool(res.get("password_hash"))
+    return res
 
 @app.put("/api/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user_data: UserCreate):
+def update_user(user_id: int, user_data: UserUpdate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE users SET name = ?, avatar = ?, weekly_goal = ?, role = ? WHERE id = ?",
-        (user_data.name, user_data.avatar, user_data.weekly_goal, user_data.role, user_id)
-    )
+    
+    # Build dynamic update query
+    updates = []
+    values = []
+    
+    for field, value in user_data.dict(exclude_unset=True).items():
+        updates.append(f"{field} = ?")
+        values.append(value)
+    
+    if not updates:
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        conn.close()
+        return dict(user)
+        
+    values.append(user_id)
+    query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+    cursor.execute(query, tuple(values))
+    
     if cursor.rowcount == 0:
         conn.close()
         raise HTTPException(status_code=404, detail="User not found")
     conn.commit()
+    
+    # Fetch the full updated user
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    updated_user = cursor.fetchone()
     conn.close()
-    return {**user_data.dict(), "id": user_id}
+    
+    res = dict(updated_user)
+    res["has_password"] = bool(res.get("password_hash"))
+    return res
+
+class LoginRequest(BaseModel):
+    password: str
+
+@app.post("/api/users/{user_id}/login")
+def login_user(user_id: int, request: LoginRequest):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if not user["password_hash"]:
+        return {"success": True, "message": "No password required"}
+        
+    if verify_password(request.password, user["password_hash"]):
+        return {"success": True, "message": "Login successful"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid password")
+
+@app.put("/api/users/{user_id}/password")
+def change_password(user_id: int, passwords: PasswordChange):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user["password_hash"] and not verify_password(passwords.old_password, user["password_hash"]):
+        conn.close()
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+        
+    new_hash = get_password_hash(passwords.new_password)
+    cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
+    conn.commit()
+    conn.close()
+    return {"message": "Password updated successfully"}
 
 @app.put("/api/users/{user_id}/review_time")
 async def increment_review_time(user_id: int, seconds: int):

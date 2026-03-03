@@ -17,24 +17,35 @@ def init_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE,
         avatar TEXT NOT NULL,
         weekly_goal INTEGER DEFAULT 80,
         role TEXT DEFAULT 'USER',
-        total_review_seconds INTEGER DEFAULT 0
+        total_review_seconds INTEGER DEFAULT 0,
+        password_hash TEXT,
+        bio TEXT,
+        alias TEXT,
+        social_links TEXT,
+        banner TEXT
     )
     ''')
 
     # Migration for existing DBs
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'USER'")
-    except sqlite3.OperationalError:
-        pass # Column already exists
+    columns_to_add = [
+        ("role", "TEXT DEFAULT 'USER'"),
+        ("total_review_seconds", "INTEGER DEFAULT 0"),
+        ("password_hash", "TEXT"),
+        ("bio", "TEXT"),
+        ("alias", "TEXT"),
+        ("social_links", "TEXT"),
+        ("banner", "TEXT")
+    ]
 
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN total_review_seconds INTEGER DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass # Column already exists
+    for col_name, col_def in columns_to_add:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+        except sqlite3.OperationalError:
+            pass # Column already exists
 
     # Seed default users if empty
     cursor.execute("SELECT COUNT(*) FROM users")

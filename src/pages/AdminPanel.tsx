@@ -8,7 +8,9 @@ export default function AdminPanel() {
         name: '',
         avatar: 'https://picsum.photos/seed/new/100/100',
         weekly_goal: 80,
-        role: 'USER'
+        role: 'USER',
+        total_review_seconds: 0,
+        has_password: false
     });
 
     if (!currentUser || currentUser.role !== 'ADMIN') {
@@ -30,7 +32,9 @@ export default function AdminPanel() {
             name: '',
             avatar: `https://picsum.photos/seed/${Math.random()}/100/100`,
             weekly_goal: 80,
-            role: 'USER'
+            role: 'USER',
+            total_review_seconds: 0,
+            has_password: false
         });
         setIsEditing(null);
     };
@@ -41,7 +45,9 @@ export default function AdminPanel() {
             name: user.name,
             avatar: user.avatar,
             weekly_goal: user.weekly_goal,
-            role: user.role
+            role: user.role,
+            total_review_seconds: user.total_review_seconds,
+            has_password: user.has_password
         });
     };
 
@@ -90,6 +96,7 @@ export default function AdminPanel() {
                                 <input
                                     type="text"
                                     required
+                                    autoComplete="off"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full bg-background-dark border border-[#333] text-white rounded-lg p-3 focus:outline-none focus:border-primary font-mono text-sm"

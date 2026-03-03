@@ -5,7 +5,7 @@ import CircularProgress from './CircularProgress';
 
 export default function Sidebar() {
   const location = useLocation();
-  const { currentUser, users, setCurrentUser, logout } = useUser();
+  const { currentUser, logout } = useUser();
   const [weeklyMinutes, setWeeklyMinutes] = useState(0);
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function Sidebar() {
     { path: '/archive', label: 'THE ARCHIVE', icon: 'history' },
     { path: '/terminal', label: 'THE TERMINAL', icon: 'terminal' },
     { path: '/studio', label: 'THE STUDIO', icon: 'tune' },
+    { path: '/profile', label: 'THE PROFILE', icon: 'person' },
   ];
 
   if (currentUser?.role === 'ADMIN') {
@@ -66,16 +67,6 @@ export default function Sidebar() {
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h1 className="text-white text-lg font-bold tracking-tight">{currentUser?.name}</h1>
-                <button
-                  onClick={() => {
-                    const nextUser = users.find(u => u.id !== currentUser?.id) || users[0];
-                    if (nextUser) setCurrentUser(nextUser);
-                  }}
-                  className="p-1 text-muted hover:text-primary transition-colors"
-                  title="Switch User"
-                >
-                  <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
-                </button>
               </div>
               <p className="text-primary text-xs font-mono tracking-wider">ONLINE // SYNCED</p>
             </div>
@@ -90,8 +81,8 @@ export default function Sidebar() {
                   to={item.path}
                   state={{ context: currentContext }}
                   className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 ${isActive
-                      ? 'bg-[#1f2b25] border border-primary/20 shadow-neon text-white'
-                      : 'hover:bg-[#1f2b25] text-[#9bbbae] hover:text-white'
+                    ? 'bg-[#1f2b25] border border-primary/20 shadow-neon text-white'
+                    : 'hover:bg-[#1f2b25] text-[#9bbbae] hover:text-white'
                     }`}
                 >
                   <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-primary' : 'group-hover:text-primary transition-colors'}`}>
@@ -115,7 +106,7 @@ export default function Sidebar() {
                   <h4 className="text-white font-bold text-sm leading-none">{weeklyMinutes} / {currentUser.weekly_goal} m</h4>
                 </div>
                 <CircularProgress
-                  value={Math.min((weeklyMinutes / currentUser.weekly_goal) * 100, 100)}
+                  value={currentUser.weekly_goal > 0 ? Math.min((weeklyMinutes / currentUser.weekly_goal) * 100, 100) : 0}
                   size={36}
                   strokeWidth={4}
                 />

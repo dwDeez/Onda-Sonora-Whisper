@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser, User } from '../contexts/UserContext';
+import LoginModal from '../components/LoginModal';
 
 export default function Welcome() {
     const { users, setCurrentUser, refreshUsers, availableModels, selectedModel, setSelectedModel } = useUser();
     const navigate = useNavigate();
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [newUserName, setNewUserName] = useState('');
+    const [newUserPassword, setNewUserPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [pendingUserId, setPendingUserId] = useState<number | null>(null);
 
     const handleSelectUser = (user: User) => {
-        setCurrentUser(user);
-        navigate('/');
+        if (user.has_password) {
+            setPendingUserId(user.id);
+            setIsLoginOpen(true);
+        } else {
+            setCurrentUser(user);
+            navigate('/');
+        }
     };
 
     const handleCreateUser = async (e: React.FormEvent) => {
@@ -19,25 +30,30 @@ export default function Welcome() {
         if (!newUserName.trim() || isSubmitting) return;
 
         setIsSubmitting(true);
+        setError(null);
         try {
             const response = await fetch('/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: newUserName,
+                    password: newUserPassword || null,
                     avatar: `https://picsum.photos/seed/${newUserName}/100/100`,
                     weekly_goal: 0
                 })
             });
 
+            const data = await response.json();
             if (response.ok) {
                 await refreshUsers();
-                const data = await response.json();
                 setCurrentUser(data);
                 navigate('/');
+            } else {
+                setError(data.detail || 'IDENTITY_ESTABLISHMENT_FAILED');
             }
         } catch (error) {
             console.error('Failed to create user:', error);
+            setError('CONNECTION_ERROR');
         } finally {
             setIsSubmitting(false);
         }
@@ -129,24 +145,45 @@ export default function Welcome() {
                             </div>
 
                             <form onSubmit={handleCreateUser} className="space-y-6">
-                                <div className="space-y-2 text-left">
-                                    <label className="text-muted text-[10px] font-mono tracking-widest uppercase pl-1">Handle_ID</label>
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        value={newUserName}
-                                        onChange={(e) => setNewUserName(e.target.value)}
-                                        placeholder="Enter Identification..."
-                                        className="w-full bg-background-dark border border-[#1f2b25] rounded-xl px-4 py-4 text-white focus:outline-none focus:border-primary transition-all font-mono text-sm"
-                                    />
+                                <div className="space-y-4">
+                                    <div className="space-y-2 text-left">
+                                        <label className="text-muted text-[10px] font-mono tracking-widest uppercase pl-1">Handle_ID</label>
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            autoComplete="username"
+                                            value={newUserName}
+                                            onChange={(e) => setNewUserName(e.target.value)}
+                                            placeholder="Enter Identification..."
+                                            className="w-full bg-background-dark border border-[#1f2b25] rounded-xl px-4 py-4 text-white focus:outline-none focus:border-primary transition-all font-mono text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 text-left">
+                                        <label className="text-muted text-[10px] font-mono tracking-widest uppercase pl-1">Access_Shield (Optional)</label>
+                                        <input
+                                            type="password"
+                                            autoComplete="new-password"
+                                            value={newUserPassword}
+                                            onChange={(e) => setNewUserPassword(e.target.value)}
+                                            placeholder="Create secure key..."
+                                            className="w-full bg-background-dark border border-[#1f2b25] rounded-xl px-4 py-4 text-white focus:outline-none focus:border-primary transition-all font-mono text-sm"
+                                        />
+                                    </div>
+                                    {error && (
+                                        <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-3 text-red-500 text-[10px] font-mono flex items-center gap-2 animate-pulse">
+                                            <span className="material-symbols-outlined text-sm">warning</span>
+                                            <span>{error}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={!newUserName.trim() || isSubmitting}
-                                    className="w-full py-4 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-mono tracking-widest uppercase text-xs"
+                                    className="w-full py-4 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-mono tracking-widest uppercase text-xs flex items-center justify-center gap-2"
                                 >
-                                    {isSubmitting ? 'Initializing...' : 'Confirm Identity'}
+                                    {isSubmitting && <span className="w-3 h-3 border-2 border-background-dark/30 border-t-background-dark rounded-full animate-spin"></span>}
+                                    {isSubmitting ? 'Initializing Identity...' : 'Confirm Identity'}
                                 </button>
                             </form>
                         </div>
@@ -157,6 +194,17 @@ export default function Welcome() {
                     Onda Sonora // Modern Language Learning // 2026
                 </footer>
             </div>
+            {pendingUserId && (
+                <LoginModal
+                    isOpen={isLoginOpen}
+                    onClose={() => {
+                        setIsLoginOpen(false);
+                        setPendingUserId(null);
+                    }}
+                    userId={pendingUserId}
+                    onSuccess={() => navigate('/')}
+                />
+            )}
         </div>
     );
 }
