@@ -1,8 +1,13 @@
 import sqlite3
+import os
+from dotenv import load_dotenv
 from typing import List, Dict, Any
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "onda_sonora.db"
+# Load environment variables
+load_dotenv()
+
+DB_PATH = os.getenv("DATABASE_URL", str(Path(__file__).parent / "onda_sonora.db"))
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)

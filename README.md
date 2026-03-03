@@ -30,7 +30,7 @@
     - [🤫 Configuración de Whisper-Server](#-configuración-de-whisper-server)
     - [🐧 Instrucciones para Linux](#-instrucciones-para-linux)
     - [🪟 Instrucciones para Windows](#-instrucciones-para-windows)
-- [⚙️ Configuración Adicional](#️-configuración-adicional)
+- [⚙️ Configuración de Variables de Entorno](#️-configuración-de-variables-de-entorno)
 
 ---
 
@@ -211,11 +211,36 @@ Puedes usar el ejecutable precompilado de `whisper.cpp` o usar una alternativa e
 
 ---
 
-## ⚙️ Configuración Adicional
+## ⚙️ Configuración de Variables de Entorno
 
-Asegúrate de tener un archivo `.env` en la raíz (puedes usar `.env.example` como base). Verifica que el backend apunte correctamente a la instancia de Ollama (por defecto `http://localhost:11434`).
+El proyecto utiliza archivos `.env` para gestionar la configuración de forma segura y dinámica tanto en el Frontend como en el Backend.
 
----
+### 🎨 Frontend (.env.local)
+Crea un archivo llamado `.env.local` en la raíz del proyecto para configurar el acceso a los servicios de IA:
+
+```env
+# API Key de Gemini (Opcional, si usas servicios de Google)
+GEMINI_API_KEY="tu_api_key_aquí"
+
+# URLs de servicios locales
+VITE_OLLAMA_URL="http://localhost:11434"
+VITE_WHISPER_URL="http://127.0.0.1:8080/inference"
+```
+
+### ⚙️ Backend (backend/.env)
+Crea un archivo llamado `.env` dentro de la carpeta `backend/` para configurar el servidor y la base de datos:
+
+```env
+# URL del Frontend para permitir CORS (por defecto http://localhost:3000)
+FRONTEND_URL=http://localhost:3000
+
+# Ruta de la base de Datos (Local / SQLite)
+DATABASE_URL=onda_sonora.db
+
+# Puerto del servidor backend (por defecto 8000)
+PORT=8000
+```
+
 
 <div align="center">
   <p>Creado con ❤️ para el aprendizaje de idiomas.</p>

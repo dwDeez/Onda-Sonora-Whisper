@@ -1,6 +1,6 @@
 import { promptService } from './src/services/promptService';
 
-const contexts = ['BUSINESS', 'ACADEMIC', 'TECHNICAL', 'CASUAL'];
+const contexts = ['BUSINESS', 'ACADEMIC', 'TECHNICAL', 'CASUAL', 'SHOPPING', 'TRAVEL', 'INTERVIEW', 'MEDICAL', 'SOCIAL'];
 
 console.log("--- PROMPT VERIFICATION ---\n");
 

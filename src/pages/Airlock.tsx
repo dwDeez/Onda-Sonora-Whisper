@@ -165,7 +165,7 @@ export default function Airlock() {
                           : 'bg-background-dark/50 border-white/10 text-text-muted hover:border-primary/30'
                           }`}
                       >
-                        <span>{model.split(':')[0].toUpperCase()}</span>
+                        <span>{model.split('|')[0].toUpperCase()}</span> {/* Correccion minima Para mostrar el nombre completo del modelo se cambian : por | */}
                         {selectedModel === model && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>}
                       </button>
                     ))}
